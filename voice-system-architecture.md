@@ -88,9 +88,7 @@
 
 ### 5.1 Hardware
 - Micrófono de calidad media-alta
-- Procesador: Intel i5 o superior
-- RAM: 8GB mínimo
-- Almacenamiento: SSD preferible
+- Altavoz 
 
 ### 5.2 Software
 - Python 3.8+
