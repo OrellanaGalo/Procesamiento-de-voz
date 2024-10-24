@@ -16,11 +16,7 @@ graph TD
     I -->|Datos Inválidos| K[Solicitud de Aclaración]
     K --> A
     
-    J --> L[Módulo de Consultas]
-    J --> M[Módulo de Altas]
-    
-    L --> N[Respuesta por Voz]
-    M --> N
+    J --> N[Respuesta por Voz]
     N --> O[Text-to-Speech Engine]
     O --> P[Salida de Audio]
 ```
