@@ -1,3 +1,6 @@
+# Diseño BD
+-
+```mermaid
 erDiagram
     USUARIO {
         int id_usuario PK
