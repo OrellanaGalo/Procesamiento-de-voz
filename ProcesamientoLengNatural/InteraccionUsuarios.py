@@ -2,12 +2,13 @@ import pyaudio
 import numpy as np
 import wave
 import time
-import speech_recognition as sr
+# import speech_recognition as sr Grupo ILN
 
 
 class InteraccionUsuario:
     def __init__(self):
         self.solicitud = []  # Aquí almacenaremos la solicitud actual
+        self.tipo_solicitud = ""
         # Configuración de parámetros de audio
         self.FORMAT = pyaudio.paInt16  # Formato de 16-bit PCM
         self.CHANNELS = 1  # Mono
@@ -75,7 +76,6 @@ class InteraccionUsuario:
             print("No se detectó voz válida.")
             return False
         
-
     def guardar_audio(self, filename="audio_output.wav"):
         """
         Guarda el contenido de self.solicitud en un archivo de audio .wav.
@@ -107,10 +107,10 @@ class InteraccionUsuario:
         audio_data = np.frombuffer(b''.join(self.solicitud), dtype=np.int16)
 
         print(f"datos de audio como arreglo: {audio_data}")
-        # Verificar que el promedio de la energía de la señal sea mayor a 3000 (umbral de 3k)
+        # Verificar que el promedio de la energía de la señal sea mayor a 2000 (umbral de 3k)
         energy = np.sum(np.abs(audio_data)) / len(audio_data)
         print(f"Energía promedio de la solicitud: {energy}")
-        if energy < 3000:
+        if energy < 2000:
             print("La energía de la solicitud es demasiado baja, es posible que solo haya ruido ambiente.")
             return False
 
@@ -123,19 +123,6 @@ class InteraccionUsuario:
 
         # Si todas las validaciones son correctas
         return True
-
-    def determinar_tipo_solicitud(self):
-        # Analiza la solicitud para ver si es de ingreso o egreso
-        # Actualiza el estado o la variable de tipo de solicitud
-        pass
-
-    def procesar_ingreso(self):
-        # Procesa la solicitud de ingreso y prepara los datos para el Grupo 2
-        pass
-
-    def procesar_egreso(self):
-        # Procesa la solicitud de egreso y prepara los datos para el Grupo 2
-        pass
 
     def generar_mensaje_error(self):
         # Genera un mensaje de error en caso de que la solicitud sea inválida
@@ -151,18 +138,13 @@ class InteraccionUsuario:
         if not self.validar_solicitud():
             mensaje_error = self.generar_mensaje_error()
             self.respuesta_sistema(mensaje_error)
-            return False #generacion de una excepcion
+            return 1 #generacion de una excepcion
         
-        tipo_solicitud = self.determinar_tipo_solicitud()
+        # determinar_tipo_solicitud() grupo ILN
         
-        if tipo_solicitud == "ingreso":
-            self.procesar_ingreso()
-        elif tipo_solicitud == "egreso":
-            self.procesar_egreso()
+        #obtengo respuesta del lugar asignado o del precio en caso de egreso
         
         # Generar y enviar respuesta
         mensaje_respuesta = "Solicitud procesada con éxito"  # Ejemplo de mensaje
         self.respuesta_sistema(mensaje_respuesta)
-
-
 
