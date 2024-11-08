@@ -2,7 +2,7 @@ import pyaudio
 import numpy as np
 import wave
 import time
-
+import speech_recognition as sr
 
 
 class InteraccionUsuario:
@@ -20,7 +20,7 @@ class InteraccionUsuario:
         self.p = pyaudio.PyAudio()
 
     def capturar_solicitud(self):
-        """_summary_
+        """
         Captura la entrada de voz del usuario. Si el nivel de energia es mayor al umbra,
         se graba durante 5 segundos.
         """
@@ -78,7 +78,7 @@ class InteraccionUsuario:
 
     def guardar_audio(self, filename="audio_output.wav"):
         """
-           Guarda el contenido de self.solicitud en un archivo de audio .wav.
+        Guarda el contenido de self.solicitud en un archivo de audio .wav.
         """
         if not self.solicitud:
             print("No hay audio en self.solicitud para guardar.")
@@ -94,9 +94,35 @@ class InteraccionUsuario:
         print(f"Archivo de audio guardado como: {filename}")
 
     def validar_solicitud(self):
-        # Validar si la solicitud es válida o no
-        # Devuelve True si es válida, False en caso contrario
-        pass
+        """
+        Valida si la solicitud de audio es válida.
+        Contiene voz en lugar de solo ruido ambiente.
+        """
+        # Verificar que self.solicitud no esté vacía
+        if not self.solicitud:
+            print("No hay datos de audio grabados.")
+            return False
+
+        # Convertir self.solicitud en un arreglo numpy para procesarlo
+        audio_data = np.frombuffer(b''.join(self.solicitud), dtype=np.int16)
+
+        print(f"datos de audio como arreglo: {audio_data}")
+        # Verificar que el promedio de la energía de la señal sea mayor a 3000 (umbral de 3k)
+        energy = np.sum(np.abs(audio_data)) / len(audio_data)
+        print(f"Energía promedio de la solicitud: {energy}")
+        if energy < 3000:
+            print("La energía de la solicitud es demasiado baja, es posible que solo haya ruido ambiente.")
+            return False
+
+        # Verificar que el tiempo de grabación sea mayor a 1 segundo
+        duration = len(self.solicitud) * self.CHUNK / self.RATE
+        print(f"Duración de la solicitud: {duration} segundos")
+        if duration < 1:
+            print("La duración de la solicitud es demasiado corta.")
+            return False
+
+        # Si todas las validaciones son correctas
+        return True
 
     def determinar_tipo_solicitud(self):
         # Analiza la solicitud para ver si es de ingreso o egreso
@@ -125,7 +151,7 @@ class InteraccionUsuario:
         if not self.validar_solicitud():
             mensaje_error = self.generar_mensaje_error()
             self.respuesta_sistema(mensaje_error)
-            return
+            return False #generacion de una excepcion
         
         tipo_solicitud = self.determinar_tipo_solicitud()
         
