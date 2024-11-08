@@ -1,0 +1,4 @@
+pip install PyAudio #para gestion de entradas de audio
+    |-> Dependencias: 
+                    sudo apt-get install portaudio19-dev
+
