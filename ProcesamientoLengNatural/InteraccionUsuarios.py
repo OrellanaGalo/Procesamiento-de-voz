@@ -18,8 +18,6 @@ class InteraccionUsuario:
         self.OUTPUT_FILENAME = "audio_output.wav"
         # Inicialización de PyAudio
         self.p = pyaudio.PyAudio()
-        
-
 
     def capturar_solicitud(self):
         """_summary_
@@ -69,9 +67,31 @@ class InteraccionUsuario:
         # Finaliza el stream y cierra el recurso de audio
         stream.stop_stream()
         stream.close()
-        print("Grabación almacenada en self.solicitud.")
+        if self.solicitud:
+            print("Grabación almacenada en self.solicitud.")
+            self.guardar_audio()
+            return True
+        else:
+            print("No se detectó voz válida.")
+            return False
         
 
+    def guardar_audio(self, filename="audio_output.wav"):
+        """
+           Guarda el contenido de self.solicitud en un archivo de audio .wav.
+        """
+        if not self.solicitud:
+            print("No hay audio en self.solicitud para guardar.")
+            return
+            
+        # Configura el archivo de salida .wav
+        with wave.open(filename, 'wb') as wf:
+            wf.setnchannels(self.CHANNELS)
+            wf.setsampwidth(self.p.get_sample_size(self.FORMAT))
+            wf.setframerate(self.RATE)
+            wf.writeframes(b''.join(self.solicitud))
+            
+        print(f"Archivo de audio guardado como: {filename}")
 
     def validar_solicitud(self):
         # Validar si la solicitud es válida o no
