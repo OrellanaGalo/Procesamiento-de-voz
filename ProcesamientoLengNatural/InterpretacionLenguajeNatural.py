@@ -16,7 +16,6 @@ class InterpretacionLenguajeNatural:
         self.duracion_valida = False
         self.datos_vehiculo_valido = False
 
-
     def reset(self):
         self.solicitud = None  # Contendrá el audio capturado
         self.tipo_solicitud = None  # Tipo de solicitud ('ingreso', 'egreso')
@@ -38,76 +37,46 @@ class InterpretacionLenguajeNatural:
             wf.setframerate(16000)  # Frecuencia de muestreo de 16 kHz
             wf.writeframes(b''.join(self.solicitud))
         return filename
-
-    def recibir_solicitud(self, solicitud):
-        """
-        Recibe el audio capturado (solicitud) de InteraccionUsuario y lo almacena.
-        """
-        self.solicitud = solicitud
-        print("Solicitud recibida en InterpretacionLenguajeNatural.")    
             
     def validar_solicitud(self):
-        """
-        Valida si la solicitud de audio es válida.
-        Contiene voz en lugar de solo ruido ambiente.
-        """
-        # Verificar que self.solicitud no esté vacía
+        """Valida si la solicitud de audio es válida (no es ruido ambiente)."""
         if not self.solicitud:
             print("No hay datos de audio grabados.")
             return False
-
-        # Convertir self.solicitud en un arreglo numpy para procesarlo
         audio_data = np.frombuffer(b''.join(self.solicitud), dtype=np.int16)
-
-        # Verificar que la energía de la señal sea suficiente
         energy = np.sum(np.abs(audio_data)) / len(audio_data)
-        print(f"Energía promedio de la solicitud: {energy}")
         if energy < 2000:
             print("La energía de la solicitud es demasiado baja, es posible que solo haya ruido ambiente.")
             return False
-
-        # Verificar que el tiempo de grabación sea mayor a 1 segundo
-        duration = len(self.solicitud) * 2048 / 16000  # Ajustar con CHUNK y RATE del sistema de captura
-        print(f"Duración de la solicitud: {duration} segundos")
+        duration = len(self.solicitud) * 2048 / 16000
         if duration < 1:
             print("La duración de la solicitud es demasiado corta.")
             return False
-
         return True
-    
+
     def determinar_tipo_solicitud(self):
         """Determina si la solicitud es para Ingreso o Egreso."""
         egreso = ["salir", "egreso", "retirar"]
         ingreso = ["ingresar", "estacionar", "entrada"]
-
         if not self.texto_transcrito:
             print("No hay texto para analizar.")
             return None
-
-        # Analizar si el texto contiene palabras clave de ingreso o egreso
         if any(palabra in self.texto_transcrito.lower() for palabra in egreso):
             self.tipo_solicitud = "egreso"
-            print("Solicitud de egreso detectada.")
         elif any(palabra in self.texto_transcrito.lower() for palabra in ingreso):
             self.tipo_solicitud = "ingreso"
-            print("Solicitud de ingreso detectada.")
         else:
             self.tipo_solicitud = "desconocido"
-            print("Tipo de solicitud desconocido.")
         return self.tipo_solicitud
 
     def speech_to_text(self):
-        """
-        Convierte el audio en texto usando Google Speech-to-Text.
-        """
-        filename = self.guardar_audio_temporal()  # Guarda el archivo temporal
+        """Convierte el audio en texto usando Google Speech-to-Text."""
+        filename = self.guardar_audio_temporal()
         recognizer = sr.Recognizer()
-
         with sr.AudioFile(filename) as source:
             audio = recognizer.record(source)
         try:
             self.texto_transcrito = recognizer.recognize_google(audio, language="es-ES")
-            print("Texto transcrito:", self.texto_transcrito)
         except sr.UnknownValueError:
             print("No se pudo entender el audio.")
             self.texto_transcrito = None
