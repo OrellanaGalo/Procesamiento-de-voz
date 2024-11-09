@@ -84,14 +84,33 @@ class InterpretacionLenguajeNatural:
             print(f"Error al conectarse al servicio de reconocimiento de voz: {e}")
             self.texto_transcrito = None
         finally:
-            pass
-            #os.remove(filename)  # Elimina el archivo temporal después de su uso
+            os.remove(filename)
+        return self.texto_transcrito
+    
+    def speech_to_text2(self):
+        """Convierte el audio en texto usando Google Speech-to-Text."""
+        
+        recognizer = sr.Recognizer()
+        with sr.Microphone() as source:
+            print("Hablar ahora")
+            audio = recognizer.listen(source)
+
+
+        try:
+            self.texto_transcrito = recognizer.recognize_google(audio, language="es-ES")
+        except sr.UnknownValueError:
+            print("No se pudo entender el audio.")
+            self.texto_transcrito = None
+        except sr.RequestError as e:
+            print(f"Error al conectarse al servicio de reconocimiento de voz: {e}")
+            self.texto_transcrito = None
+        
         return self.texto_transcrito
 
     def analisis_intension(self):
         """Realiza el análisis de la intención del usuario y gestiona el flujo."""
         if not self.texto_transcrito:
-            self.texto_a_voz("No se pudo entender la solicitud Intente nuevamente.")
+            self.text_to_speech("No se pudo entender la solicitud Intente nuevamente.")
             return 1
 
         tipo_solicitud = self.determinar_tipo_solicitud()
@@ -101,51 +120,78 @@ class InterpretacionLenguajeNatural:
         elif tipo_solicitud == "egreso":
             self.solicitud_egreso()
         else:
-            self.texto_a_voz("No entendí su solicitud. ¿Desea ingresar o retirar el vehículo?")
+            self.text_to_speech("No entendí su solicitud. ¿Desea ingresar o retirar el vehículo?")
 
     def solicitud_ingreso(self):
         """Gestiona el flujo de ingreso: solicita tipo de vehículo, patente y duración."""
-        self.texto_a_voz("Por favor, indique el tipo de vehículo y su patente.")
+        self.text_to_speech("Por favor, indique su patente.")
+        print("texto: ",self.speech_to_text2())
+        datos_vehiculo = self.validar_datos_vehiculo()
 
-        iu = InteraccionUsuario.InteraccionUsuario
-        self.solicitud = iu.capturar_solicitud(self)
-        self.speech_to_text()# Captura los datos de tipo y patente
-        
-        self.validar_datos_vehiculo()
-        
         if not self.datos_vehiculo_valido:
-            self.texto_a_voz("Datos del vehículo incorrectos. Intente nuevamente.")
-            self.solicitud_ingreso()  # Repite si la validación falla
+            print(f"\t\t\t\t\t\t\t\t\t\n\n Datos vehiculo incorrectos\n\n")
+            self.text_to_speech("Datos del vehículo incorrectos. Intente nuevamente.")
+            return 1  # Retornar control al flujo principal en caso de datos incorrectos
 
-        self.texto_a_voz("Indique la duración del estacionamiento.")
-        self.speech_to_text()
-        self.validar_duracion()
+        self.consulta.append(datos_vehiculo)
+
+        self.text_to_speech("Indique la duración del estacionamiento.")
+        print("texto: ",self.speech_to_text2())
+
+        self.consulta.append(self.validar_duracion())
+
+        self.text_to_speech("Todo correcto")
+
+        #enviar solicitud con los datos a la BD
+        return self.consulta
 
     def solicitud_egreso(self):
         """Gestiona el flujo de egreso: solicita confirmación y patente."""
-        self.texto_a_voz("Confirmo que desea retirar su vehículo. Por favor, indique su patente.")
-        self.speech_to_text()
-        self.validar_datos_vehiculo()
+        self.text_to_speech("Confirmo que desea retirar su vehículo. Por favor, indique su patente.")
+        print(f"texto: {self.speech_to_text2()}")
+        datos_vehiculo = self.validar_datos_vehiculo()
+        return datos_vehiculo
 
-    def validar_datos_vehiculo(self):
-        """Valida el tipo de vehículo y patente extraídos del texto."""
-        # Implementa lógica de validación para tipo de vehículo y patente
-        self.datos_vehiculo_valido = "ABC123" in self.texto_transcrito  # Ejemplo de validación simplificada
-        print(self.datos_vehiculo_valido)
-        return self.datos_vehiculo_valido
+    def validar_datos_vehiculo(self): #Se puede agregar que verifique el tipo de vehiculo
+        """Valida la patente extraída del texto, permitiendo diferentes formatos."""
+        print(f"Texto transcrito: {self.texto_transcrito}")
+        
+        # Expresión regular para encontrar la patente en diferentes formatos
+        patron = r'\b([a-zA-Z]\s*[a-zA-Z]?\s*[a-zA-Z]?\s*\d\s*\d\s*\d)\b'
+        coincidencia = re.search(patron, self.texto_transcrito, re.IGNORECASE)
+        
+        if coincidencia:
+            # Eliminar espacios y convertir a minúsculas
+            patente = coincidencia.group(1).replace(" ", "").lower()
+            self.datos_vehiculo_valido = True
+            return patente
+        else:
+            self.datos_vehiculo_valido = False
+            return None
 
     def validar_duracion(self):
-        """Valida la duración del estacionamiento."""
-        # Implementa la lógica de validación para la duración; se debe extraer una cantidad de tiempo
-        if "hora" in self.texto_transcrito or "minuto" in self.texto_transcrito:
+        """Valida la duración del estacionamiento y extrae la hora en formato hh:mm:ss."""
+        print(f"\t\t\t\t\t\n\n Texto de tiempo: {self.texto_transcrito}")
+        
+        # Expresión regular para encontrar horas y minutos
+        patron = r'(\d+)\s*(hora|horas|h)?\s*(\d+)?\s*(minuto|minutos|m)?'
+        coincidencia = re.search(patron, self.texto_transcrito, re.IGNORECASE)
+        
+        if coincidencia:
+            horas = int(coincidencia.group(1)) if coincidencia.group(1) else 0
+            minutos = int(coincidencia.group(3)) if coincidencia.group(3) else 0
+            segundos = 0  # Puedes ajustar esto si necesitas manejar segundos también
+            
             self.duracion_valida = True
+            return f"{horas:02}:{minutos:02}:{segundos:02}"
         else:
             self.duracion_valida = False
-        return self.duracion_valida
+            return None
 
-    def texto_a_voz(self, texto):
+    def text_to_speech(self, texto):
         """Convierte texto a voz usando gTTS y reproduce el archivo generado."""
         tts = gTTS(text=texto, lang='es')
         tts.save("respuesta.mp3")
         os.system("mpg123 respuesta.mp3")  # Requiere tener instalado mpg123
+
 
