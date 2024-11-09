@@ -5,13 +5,31 @@ import numpy as np
 import wave
 import time
 import InteraccionUsuario.InteraccionUsuarios as InteraccionUsuario
+import re
 
 class InterpretacionLenguajeNatural:
     def __init__(self):
         self.solicitud = None  # Contendrá el audio capturado
         self.tipo_solicitud = None  # Tipo de solicitud ('ingreso', 'egreso')
         self.texto_transcrito = ""  # Texto transcrito del audio
-   
+        self.consulta = [] #Contendra la consulta que se le hace a la BD
+        self.duracion_valida = False
+        self.datos_vehiculo_valido = False
+
+
+    def reset(self):
+        self.solicitud = None  # Contendrá el audio capturado
+        self.tipo_solicitud = None  # Tipo de solicitud ('ingreso', 'egreso')
+        self.texto_transcrito = ""  # Texto transcrito del audio
+        self.consulta = [] #Contendra la consulta que se le hace a la BD
+        self.duracion_valida = False
+        self.datos_vehiculo_valido = False
+
+    def recibir_solicitud(self, solicitud):
+        """Recibe el audio capturado de InteraccionUsuario y lo almacena."""
+        self.solicitud = solicitud
+        print("\t\t\tSolicitud recibida en InterpretacionLenguajeNatural.")
+
     def guardar_audio_temporal(self, filename="temp_audio.wav"):
         """Guarda self.solicitud en un archivo WAV temporal."""
         with wave.open(filename, 'wb') as wf:
