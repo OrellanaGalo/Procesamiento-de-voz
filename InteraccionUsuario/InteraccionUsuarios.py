@@ -2,7 +2,7 @@ import pyaudio
 import numpy as np
 import wave
 import time
-import ProcesamientoLengNatural.InterpretacionLenguajeNatural as PNL
+#import ProcesamientoLengNatural.InterpretacionLenguajeNatural as PNL
 # import speech_recognition as sr Grupo ILN
 
 
@@ -60,7 +60,6 @@ class InteraccionUsuario:
 
             # Almacena los datos de audio si está en modo grabación
             if recording:
-                print(energy)
                 self.solicitud.append(data)  # Almacena el bloque de audio en self.solicitud
 
                 # Termina la grabación si se alcanza la duración máxima
@@ -97,28 +96,5 @@ class InteraccionUsuario:
             
         print(f"Archivo de audio guardado como: {filename}")
 
-    def generar_mensaje_error(self):
-        # Genera un mensaje de error en caso de que la solicitud sea inválida
-        pass
 
-    def respuesta_sistema(self, mensaje):
-        # Genera la respuesta de audio basada en el mensaje pasado como parámetro
-        pass
-
-    def gestionar_interaccion(self):
-
-        self.capturar_solicitud()
-                
-        if not self.validar_solicitud():
-            mensaje_error = self.generar_mensaje_error()
-            self.respuesta_sistema(mensaje_error)
-            return 1 #generacion de una excepcion
-        
-        #PNL.determinar_tipo_solicitud()
-        
-        #obtengo respuesta del lugar asignado o del precio en caso de egreso
-        
-        # Generar y enviar respuesta
-        mensaje_respuesta = "Solicitud procesada con éxito"  # Ejemplo de mensaje
-        self.respuesta_sistema(mensaje_respuesta)
-
+    
