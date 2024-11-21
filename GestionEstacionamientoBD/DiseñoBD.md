@@ -52,3 +52,4 @@ erDiagram
     VEHICULO ||--o{ ESTACIONAMIENTO : "1 : N | estaciona en | "
     ESTACIONAMIENTO ||--|| COBRANZA : "1 : 1 | genera | "
     USUARIO ||--o{ MEMBRESIA : "1 : 1 | tiene | "
+```
