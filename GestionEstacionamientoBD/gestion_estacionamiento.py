@@ -1,9 +1,9 @@
 import psycopg2
 from psycopg2 import sql
 from datetime import datetime
-from credenciales import DBNAME, USER, PASSWORD, HOST, PORT
+from .credenciales import DBNAME, USER, PASSWORD, HOST, PORT
 
-class GestionEstacionamientoBD:
+class GestionEstacionamiento:
     def __init__(self, db_name=DBNAME, user=USER, password=PASSWORD, host=HOST, port=PORT):
         try:
             self.conn = psycopg2.connect(
