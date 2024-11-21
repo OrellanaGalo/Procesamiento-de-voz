@@ -36,7 +36,6 @@ def main():
                         else:
                             # Registrar ingreso en la base de datos.
                             patente = datos_ingreso[0]
-                            id_usuario = 1 # Aca se debe definir el ID de usuario correspondiente.
                             fecha_ingreso = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             if gestion_bd.registrarIngreso(patente, fecha_ingreso):
                                 print("Ingreso registrado en la base de datos.")

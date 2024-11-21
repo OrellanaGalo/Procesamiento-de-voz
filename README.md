@@ -1,5 +1,5 @@
 # Procesamiento-de-voz
--
+
 ```mermaid
 flowchart TD
  subgraph Grupo1["Interacción con Usuario"]
