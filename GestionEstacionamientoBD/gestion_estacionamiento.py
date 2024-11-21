@@ -70,6 +70,15 @@ class GestionEstacionamiento:
         resultado = self.ejecutarConsulta(consulta, (patente,))
         return resultado.fetchone() if resultado else None
     
+    def obtenerFechaIngreso(self, patente):
+        """Recupera la fecha de ingreso de un vehiculo basado en su patente."""
+        consulta = """
+        SELECT fecha_ingreso FROM estacionamiento WHERE patente = %s AND fecha_egreso IS NULL;
+        """
+
+        resultado = self.ejecutarConsulta(consulta, (patente,))
+        return resultado.fetchone() if resultado else None
+    
     def cerrarConexion(self):
         """Cierra la conexion con la base de datos."""
         self.cursor.close()

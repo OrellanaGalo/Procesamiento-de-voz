@@ -4,6 +4,21 @@ from GestionEstacionamientoBD.gestion_estacionamiento import GestionEstacionamie
 from GestionEstacionamientoBD.credenciales import DBNAME, USER, PASSWORD, HOST, PORT
 from datetime import datetime
 
+def calcularTiempoEstancia(fecha_ingreso, fecha_egreso):
+    """
+    Calcula el tiempo transcurrido entre la fecha de ingreso y la fecha de egreso en horas y minutos.
+    """
+
+    # Convierte las fechas en objetos datetime.
+    ingreso = datetime.strptime(fecha_ingreso, "%Y-%m-%d %H:%M:%S")
+    egreso = datetime.strptime(fecha_egreso, "%Y-%m-%d %H:%M:%S")
+
+    diferencia = egreso - ingreso
+
+    horas = diferencia.seconds // 3600
+    minutos = (diferencia.seconds % 3600) // 60
+    return horas, minutos
+
 def main():
     interaccion = InteraccionUsuario()
     pln = InterpretacionLenguajeNatural()
